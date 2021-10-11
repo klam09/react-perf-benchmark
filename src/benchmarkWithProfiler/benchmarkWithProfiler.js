@@ -1,6 +1,7 @@
 import { Profiler } from 'react';
 import globalJsdom from 'global-jsdom';
 import chalk from 'chalk';
+import shuffle from 'lodash/shuffle';
 
 import { render, cleanup as cleanupTestingLib } from '@testing-library/react';
 
@@ -102,11 +103,13 @@ class BenchmarkWithProfiler {
   run = () => {
     this.testIds = Object.keys(this.tests);
 
+    let shuffledIds = shuffle(this.testIds); // change execution order each time
+
     for (let i = 0; i < this.options.sampleSize; i++) {
-      this.testIds.forEach((id) => {
+      shuffledIds.forEach((id) => {
         this.renderByTestId(id);
       });
-      this.testIds.reverse(); // change execution order each time
+      shuffledIds = shuffle(this.testIds);
     }
 
     this.generateStat();
