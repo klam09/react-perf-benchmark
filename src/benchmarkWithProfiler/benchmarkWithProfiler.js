@@ -19,7 +19,7 @@ class BenchmarkWithProfiler {
       sampleSizeOffset,
       title,
     };
-    this.cleanupJsdom = globalJsdom(htmlTemplate);
+    this.setup();
     this.tests = {};
   }
 
@@ -46,9 +46,15 @@ class BenchmarkWithProfiler {
     });
   };
 
-  cleanup = () => {
-    this.cleanupJsdom();
+  setup = () => {
+    this.cleanupJsdom = globalJsdom(htmlTemplate);
+  };
+
+  cleanup = async () => {
     cleanupTestingLib();
+    this.cleanupJsdom();
+
+    // const isCleanupDone = () => Boolean(window) && Boolean(document);
   };
 
   add = (id, node, renderAction) => {
@@ -63,6 +69,8 @@ class BenchmarkWithProfiler {
   };
 
   renderByTestId = (id) => {
+    this.setup();
+
     const testingLibRenderResult = render(
       <Profiler id={id} onRender={this.handleProfilerRender}>
         {this.tests[id].node}
@@ -71,6 +79,8 @@ class BenchmarkWithProfiler {
     if (this.tests[id].renderAction) {
       this.tests[id].renderAction(testingLibRenderResult);
     }
+
+    this.cleanup();
   };
 
   generateStat = () => {
@@ -91,11 +101,13 @@ class BenchmarkWithProfiler {
 
   run = () => {
     this.testIds = Object.keys(this.tests);
-    this.testIds.forEach((id) => {
-      for (let i = 0; i < this.options.sampleSize; i++) {
+
+    for (let i = 0; i < this.options.sampleSize; i++) {
+      this.testIds.forEach((id) => {
         this.renderByTestId(id);
-      }
-    });
+      });
+      this.testIds.reverse(); // change execution order each time
+    }
 
     this.generateStat();
   };
