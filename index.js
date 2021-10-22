@@ -1,7 +1,7 @@
-import benchmarkMemo1 from './src/cases/memo_render_once';
-import benchmarkMemo2 from './src/cases/memo_render_sameProps';
-import benchmarkMemo3 from './src/cases/memo_render_differentProps';
+import benchmarkMemoRenderOnce from './src/cases/memo_render_once';
+import benchmarkMemoRenderSameProps from './src/cases/memo_render_sameProps';
+import benchmarkMemoRenderDifferentProps from './src/cases/memo_render_differentProps';
 
-benchmarkMemo1();
-benchmarkMemo2();
-benchmarkMemo3();
+benchmarkMemoRenderOnce();
+benchmarkMemoRenderSameProps();
+benchmarkMemoRenderDifferentProps();

@@ -1,13 +1,29 @@
-import Title from '../components/Title/Title';
-import TitleWithMemo from '../components/Title/TitleWithMemo';
+import Benchmark from 'benchmark';
+import React from 'react';
+import ReactDomServer from 'react-dom/server';
+import chalk from 'chalk';
 
-import BenchmarkWithProfiler from '../benchmarkWithProfiler/benchmarkWithProfiler';
+import Title, { TitleWithMemo } from '../components/Title';
 
 export default () => {
-  const benchmark = new BenchmarkWithProfiler({ title: 'with React.memo vs without; render once' });
+  const suite = new Benchmark.Suite();
+  const cleanup = globalJsdom(htmlTemplate);
 
-  benchmark.add('Title', <Title title="title" description="description" />);
-  benchmark.add('TitleWithMemo', <TitleWithMemo title="title" description="description" />);
-  benchmark.run();
-  benchmark.printResults();
+  console.log(chalk.green('Brenchmark with memo vs without memo, first render'));
+
+  suite
+    .add('without React.memo', () => {
+      ReactDomServer.renderToString(<Title title={`${Math.random()}`} />);
+    })
+    .add('with React.memo', () => {
+      ReactDomServer.renderToString(<TitleWithMemo title={`${Math.random()}`} />);
+    })
+    .on('cycle', function (event) {
+      console.log(String(event.target));
+    })
+    .on('complete', function () {
+      console.log('Fastest is ' + this.filter('fastest').map('name'));
+      cleanup();
+    })
+    .run({ async: false });
 };

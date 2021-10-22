@@ -1,21 +1,32 @@
-import Title from '../components/Title/Title';
-import TitleWithMemo from '../components/Title/TitleWithMemo';
+import Benchmark from 'benchmark';
+import React from 'react';
+import ReactDom from 'react-dom';
+import chalk from 'chalk';
 
-import BenchmarkWithProfiler from '../benchmarkWithProfiler/benchmarkWithProfiler';
+import globalJsdom from 'global-jsdom';
+
+import htmlTemplate from '../constants/htmlTemplate';
+import Title, { TitleWithMemo } from '../components/Title';
 
 export default () => {
-  const benchmark = new BenchmarkWithProfiler({ title: 'with React.memo vs without; re-render with same props' });
+  const suite = new Benchmark.Suite();
+  const cleanup = globalJsdom(htmlTemplate);
 
-  benchmark.add('Title', <Title title="title" description="description" />, ({ rerender }) => {
-    rerender(<Title title="title" description="description" />);
-    rerender(<Title title="title" description="description" />);
-    rerender(<Title title="title" description="description" />);
-  });
-  benchmark.add('TitleWithMemo', <TitleWithMemo title="title" description="description" />, ({ rerender }) => {
-    rerender(<TitleWithMemo title="title" description="description" />);
-    rerender(<TitleWithMemo title="title" description="description" />);
-    rerender(<TitleWithMemo title="title" description="description" />);
-  });
-  benchmark.run();
-  benchmark.printResults();
+  console.log(chalk.green('Brenchmark with memo vs without memo, re-render with same props'));
+
+  suite
+    .add('without React.memo', () => {
+      ReactDom.render(<Title title="title" />, document.getElementById('root1'));
+    })
+    .add('with React.memo', () => {
+      ReactDom.render(<TitleWithMemo title="title" />, document.getElementById('root2'));
+    })
+    .on('cycle', function (event) {
+      console.log(String(event.target));
+    })
+    .on('complete', function () {
+      console.log('Fastest is ' + this.filter('fastest').map('name'));
+      cleanup();
+    })
+    .run({ async: false });
 };

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import PropTypes from 'prop-types';
 
 const Title = ({ title, description }) => (
@@ -18,3 +19,5 @@ Title.defaultProps = {
 };
 
 export default Title;
+
+export const TitleWithMemo = memo(Title);
